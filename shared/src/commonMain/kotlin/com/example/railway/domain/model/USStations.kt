@@ -1,0 +1,63 @@
+package com.example.railway.domain.model
+
+val US_STATIONS = listOf(
+    Station("AL", "Montgomery (Alabama)", 32.366, -86.300),
+    Station("AK", "Juneau (Alaska)", 58.301, -134.419),
+    Station("AZ", "Phoenix (Arizona)", 33.448, -112.074),
+    Station("AR", "Little Rock (Arkansas)", 34.746, -92.289),
+    Station("CA", "Sacramento (California)", 38.581, -121.494),
+    Station("CO", "Denver (Colorado)", 39.739, -104.990),
+    Station("CT", "Hartford (Connecticut)", 41.763, -72.673),
+    Station("DE", "Dover (Delaware)", 39.158, -75.524),
+    Station("FL", "Tallahassee (Florida)", 30.438, -84.280),
+    Station("GA", "Atlanta (Georgia)", 33.749, -84.388),
+    Station("HI", "Honolulu (Hawaii)", 21.306, -157.858),
+    Station("ID", "Boise (Idaho)", 43.615, -116.202),
+    Station("IL", "Springfield (Illinois)", 39.781, -89.650),
+    Station("IN", "Indianapolis (Indiana)", 39.768, -86.158),
+    Station("IA", "Des Moines (Iowa)", 41.586, -93.625),
+    Station("KS", "Topeka (Kansas)", 39.047, -95.675),
+    Station("KY", "Frankfort (Kentucky)", 38.197, -84.873),
+    Station("LA", "Baton Rouge (Louisiana)", 30.451, -91.187),
+    Station("ME", "Augusta (Maine)", 44.310, -69.779),
+    Station("MD", "Annapolis (Maryland)", 38.978, -76.492),
+    Station("MA", "Boston (Massachusetts)", 42.360, -71.058),
+    Station("MI", "Lansing (Michigan)", 42.732, -84.555),
+    Station("MN", "Saint Paul (Minnesota)", 44.944, -93.090),
+    Station("MS", "Jackson (Mississippi)", 32.298, -90.184),
+    Station("MO", "Jefferson City (Missouri)", 38.576, -92.173),
+    Station("MT", "Helena (Montana)", 46.589, -112.039),
+    Station("NE", "Lincoln (Nebraska)", 40.813, -96.702),
+    Station("NV", "Carson City (Nevada)", 39.163, -119.767),
+    Station("NH", "Concord (New Hampshire)", 43.208, -71.537),
+    Station("NJ", "Trenton (New Jersey)", 40.220, -74.759),
+    Station("NM", "Santa Fe (New Mexico)", 35.686, -105.937),
+    Station("NY", "Albany (New York)", 42.652, -73.756),
+    Station("NC", "Raleigh (North Carolina)", 35.779, -78.638),
+    Station("ND", "Bismarck (North Dakota)", 46.808, -100.783),
+    Station("OH", "Columbus (Ohio)", 39.961, -82.998),
+    Station("OK", "Oklahoma City (Oklahoma)", 35.467, -97.516),
+    Station("OR", "Salem (Oregon)", 44.942, -123.035),
+    Station("PA", "Harrisburg (Pennsylvania)", 40.273, -76.886),
+    Station("RI", "Providence (Rhode Island)", 41.824, -71.412),
+    Station("SC", "Columbia (South Carolina)", 34.000, -81.034),
+    Station("SD", "Pierre (South Dakota)", 44.368, -100.351),
+    Station("TN", "Nashville (Tennessee)", 36.162, -86.781),
+    Station("TX", "Austin (Texas)", 30.267, -97.743),
+    Station("UT", "Salt Lake City (Utah)", 40.760, -111.891),
+    Station("VT", "Montpelier (Vermont)", 44.260, -72.575),
+    Station("VA", "Richmond (Virginia)", 37.540, -77.436),
+    Station("WA", "Olympia (Washington)", 47.037, -122.900),
+    Station("WV", "Charleston (West Virginia)", 38.349, -81.632),
+    Station("WI", "Madison (Wisconsin)", 43.073, -89.401),
+    Station("WY", "Cheyenne (Wyoming)", 41.140, -104.820)
+)
+
+val US_TRAINS = US_STATIONS.mapIndexed { index, station ->
+    Train(
+        id = "T-${station.id}", 
+        name = "${station.name.split(" (")[0]} Express", 
+        status = TrainStatus.RUNNING,
+        carriages = listOf(Carriage("C-${station.id}-1", 1, 150))
+    )
+}

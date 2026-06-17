@@ -1,0 +1,287 @@
+[
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "app.cash.sqldelight",
+        "name": "native-driver"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "app.cash.sqldelight",
+        "name": "native-driver"
+      }
+    },
+    "file": "/Users/abbosmahkamov/Desktop/dev/railway_booking_and_train_tracking_system/shared/build/kotlinTransformedMetadataLibraries/iosMain/app.cash.sqldelight-native-driver-2.3.2-appleMain-Qbd6ZQ.klib",
+    "sourceSetName": "appleMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "app.cash.sqldelight",
+        "name": "native-driver"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "app.cash.sqldelight",
+        "name": "native-driver"
+      }
+    },
+    "file": "/Users/abbosmahkamov/Desktop/dev/railway_booking_and_train_tracking_system/shared/build/kotlinTransformedMetadataLibraries/iosMain/app.cash.sqldelight-native-driver-2.3.2-nativeLinuxLikeMain-a2ICwg.klib",
+    "sourceSetName": "nativeLinuxLikeMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "app.cash.sqldelight",
+        "name": "native-driver"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "app.cash.sqldelight",
+        "name": "native-driver"
+      }
+    },
+    "file": "/Users/abbosmahkamov/Desktop/dev/railway_booking_and_train_tracking_system/shared/build/kotlinTransformedMetadataLibraries/iosMain/app.cash.sqldelight-native-driver-2.3.2-nativeMain-a2ICwg.klib",
+    "sourceSetName": "nativeMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "io.ktor",
+        "name": "ktor-client-darwin"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "io.ktor",
+        "name": "ktor-client-darwin"
+      }
+    },
+    "file": "/Users/abbosmahkamov/Desktop/dev/railway_booking_and_train_tracking_system/shared/build/kotlinTransformedMetadataLibraries/iosMain/io.ktor-ktor-client-darwin-3.5.0-darwinMain-wADxFg.klib",
+    "sourceSetName": "darwinMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "co.touchlab",
+        "name": "stately-concurrency"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "co.touchlab",
+        "name": "stately-concurrency"
+      }
+    },
+    "file": "/Users/abbosmahkamov/Desktop/dev/railway_booking_and_train_tracking_system/shared/build/kotlinTransformedMetadataLibraries/iosMain/co.touchlab-stately-concurrency-2.1.0-appleMain-oa7GPg.klib",
+    "sourceSetName": "appleMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "co.touchlab",
+        "name": "stately-concurrency"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "co.touchlab",
+        "name": "stately-concurrency"
+      }
+    },
+    "file": "/Users/abbosmahkamov/Desktop/dev/railway_booking_and_train_tracking_system/shared/build/kotlinTransformedMetadataLibraries/iosMain/co.touchlab-stately-concurrency-2.1.0-nativeMain-t1ZQYw.klib",
+    "sourceSetName": "nativeMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "co.touchlab",
+        "name": "stately-concurrency"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "co.touchlab",
+        "name": "stately-concurrency"
+      }
+    },
+    "file": "/Users/abbosmahkamov/Desktop/dev/railway_booking_and_train_tracking_system/shared/build/kotlinTransformedMetadataLibraries/iosMain/co.touchlab-stately-concurrency-2.1.0-commonMain-t1ZQYw.klib",
+    "sourceSetName": "commonMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "co.touchlab",
+        "name": "sqliter-driver"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "co.touchlab",
+        "name": "sqliter-driver"
+      }
+    },
+    "file": "/Users/abbosmahkamov/Desktop/dev/railway_booking_and_train_tracking_system/shared/build/kotlinTransformedMetadataLibraries/iosMain/co.touchlab-sqliter-driver-1.3.3-appleMain-pnpooQ.klib",
+    "sourceSetName": "appleMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "co.touchlab",
+        "name": "sqliter-driver"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "co.touchlab",
+        "name": "sqliter-driver"
+      }
+    },
+    "file": "/Users/abbosmahkamov/Desktop/dev/railway_booking_and_train_tracking_system/shared/build/kotlinTransformedMetadataLibraries/iosMain/co.touchlab-sqliter-driver-1.3.3-nativeCommonMain-KFJl3A.klib",
+    "sourceSetName": "nativeCommonMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "io.ktor",
+        "name": "ktor-network-tls"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "io.ktor",
+        "name": "ktor-network-tls"
+      }
+    },
+    "file": "/Users/abbosmahkamov/Desktop/dev/railway_booking_and_train_tracking_system/shared/build/kotlinTransformedMetadataLibraries/iosMain/io.ktor-ktor-network-tls-3.5.0-nonJvmMain-bglXaA.klib",
+    "sourceSetName": "nonJvmMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "io.ktor",
+        "name": "ktor-network-tls"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "io.ktor",
+        "name": "ktor-network-tls"
+      }
+    },
+    "file": "/Users/abbosmahkamov/Desktop/dev/railway_booking_and_train_tracking_system/shared/build/kotlinTransformedMetadataLibraries/iosMain/io.ktor-ktor-network-tls-3.5.0-commonMain-bglXaA.klib",
+    "sourceSetName": "commonMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "co.touchlab",
+        "name": "stately-strict"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "co.touchlab",
+        "name": "stately-strict"
+      }
+    },
+    "file": "/Users/abbosmahkamov/Desktop/dev/railway_booking_and_train_tracking_system/shared/build/kotlinTransformedMetadataLibraries/iosMain/co.touchlab-stately-strict-2.1.0-nativeMain-dKdBGA.klib",
+    "sourceSetName": "nativeMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "co.touchlab",
+        "name": "stately-strict"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "co.touchlab",
+        "name": "stately-strict"
+      }
+    },
+    "file": "/Users/abbosmahkamov/Desktop/dev/railway_booking_and_train_tracking_system/shared/build/kotlinTransformedMetadataLibraries/iosMain/co.touchlab-stately-strict-2.1.0-commonMain-dKdBGA.klib",
+    "sourceSetName": "commonMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "io.ktor",
+        "name": "ktor-network"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "io.ktor",
+        "name": "ktor-network"
+      }
+    },
+    "file": "/Users/abbosmahkamov/Desktop/dev/railway_booking_and_train_tracking_system/shared/build/kotlinTransformedMetadataLibraries/iosMain/io.ktor-ktor-network-3.5.0-iosMain-2RLEgQ.klib",
+    "sourceSetName": "iosMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "io.ktor",
+        "name": "ktor-network"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "io.ktor",
+        "name": "ktor-network"
+      }
+    },
+    "file": "/Users/abbosmahkamov/Desktop/dev/railway_booking_and_train_tracking_system/shared/build/kotlinTransformedMetadataLibraries/iosMain/io.ktor-ktor-network-3.5.0-darwinMain-2RLEgQ.klib",
+    "sourceSetName": "darwinMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "io.ktor",
+        "name": "ktor-network"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "io.ktor",
+        "name": "ktor-network"
+      }
+    },
+    "file": "/Users/abbosmahkamov/Desktop/dev/railway_booking_and_train_tracking_system/shared/build/kotlinTransformedMetadataLibraries/iosMain/io.ktor-ktor-network-3.5.0-nixMain-NJqrCA.klib",
+    "sourceSetName": "nixMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "io.ktor",
+        "name": "ktor-network"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "io.ktor",
+        "name": "ktor-network"
+      }
+    },
+    "file": "/Users/abbosmahkamov/Desktop/dev/railway_booking_and_train_tracking_system/shared/build/kotlinTransformedMetadataLibraries/iosMain/io.ktor-ktor-network-3.5.0-posixMain-NJqrCA.klib",
+    "sourceSetName": "posixMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "io.ktor",
+        "name": "ktor-network"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "io.ktor",
+        "name": "ktor-network"
+      }
+    },
+    "file": "/Users/abbosmahkamov/Desktop/dev/railway_booking_and_train_tracking_system/shared/build/kotlinTransformedMetadataLibraries/iosMain/io.ktor-ktor-network-3.5.0-nonJvmMain-NJqrCA.klib",
+    "sourceSetName": "nonJvmMain"
+  },
+  {
+    "moduleId": {
+      "groupAndName": {
+        "group": "io.ktor",
+        "name": "ktor-network"
+      },
+      "componentId": {
+        "type": "module",
+        "group": "io.ktor",
+        "name": "ktor-network"
+      }
+    },
+    "file": "/Users/abbosmahkamov/Desktop/dev/railway_booking_and_train_tracking_system/shared/build/kotlinTransformedMetadataLibraries/iosMain/io.ktor-ktor-network-3.5.0-commonMain-NJqrCA.klib",
+    "sourceSetName": "commonMain"
+  }
+]
