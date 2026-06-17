@@ -1,2 +1,0 @@
-
-<shared_commonMain>:com.example.railway:#com.example.railway.data.repository:com.example.railway.db:com.example.railway.db.shared:com.example.railway.domain.auth: com.example.railway.domain.model:%com.example.railway.domain.repository:"com.example.railway.domain.service: com.example.railway.presentation: com.example.railway.ui.component:!com.example.railway.ui.navigation:com.example.railway.ui.screen:com.example.railway.ui.theme:com.example.railway.util:Drailway_booking_and_train_tracking_system.shared.generated.resources
