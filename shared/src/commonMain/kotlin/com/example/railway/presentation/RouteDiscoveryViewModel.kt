@@ -11,6 +11,13 @@ import com.example.railway.util.StateBoundaries
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
+data class MapSettings(
+    val showInfrastructure: Boolean = true,
+    val showActiveTrains: Boolean = true,
+    val showStateBoundaries: Boolean = true,
+    val focusMyJourney: Boolean = false
+)
+
 data class RouteDiscoveryState(
     val sourceStation: Station? = null,
     val destinationStation: Station? = null,
@@ -18,7 +25,8 @@ data class RouteDiscoveryState(
     val totalDistance: Double = 0.0,
     val totalTimeMinutes: Int = 0,
     val criteria: com.example.railway.domain.service.RouteCriteria = com.example.railway.domain.service.RouteCriteria.PRICE,
-    val stateBoundaries: List<StateBoundary> = StateBoundaries.allStates
+    val stateBoundaries: List<StateBoundary> = StateBoundaries.allStates,
+    val mapSettings: MapSettings = MapSettings()
 )
 
 class RouteDiscoveryViewModel(
@@ -53,6 +61,10 @@ class RouteDiscoveryViewModel(
     fun setCriteria(criteria: com.example.railway.domain.service.RouteCriteria) {
         _state.update { it.copy(criteria = criteria) }
         calculatePath()
+    }
+
+    fun updateMapSettings(settings: MapSettings) {
+        _state.update { it.copy(mapSettings = settings) }
     }
 
     private fun calculatePath() {

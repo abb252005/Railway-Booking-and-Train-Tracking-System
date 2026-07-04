@@ -13,6 +13,7 @@ import androidx.compose.material.icons.rounded.Add
 import androidx.compose.material.icons.rounded.Delete
 import androidx.compose.material.icons.rounded.Receipt
 import androidx.compose.material3.*
+import androidx.compose.foundation.clickable
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -22,8 +23,10 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import kotlin.time.Duration.Companion.milliseconds
+import com.example.railway.domain.model.Booking
 import com.example.railway.presentation.AdminViewModel
-import com.example.railway.ui.component.GlassPanel
+import com.example.railway.ui.component.*
 import org.jetbrains.compose.resources.painterResource
 import railway_booking_and_train_tracking_system.shared.generated.resources.Res
 import railway_booking_and_train_tracking_system.shared.generated.resources.bcg_admin_1
@@ -32,11 +35,13 @@ import railway_booking_and_train_tracking_system.shared.generated.resources.bcg_
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdminDashboardScreen(viewModel: AdminViewModel) {
+    val strings = com.example.railway.ui.theme.LocalRailwayStrings.current
     val state by viewModel.state.collectAsState()
     val onSurface = MaterialTheme.colorScheme.onSurface
     
-    var showAddStationDialog by remember { mutableStateOf(false) }
-    var showAddTrainDialog by remember { mutableStateOf(false) }
+    var showAddStationDialog by remember { mutableStateOf(value = false) }
+    var showAddTrainDialog by remember { mutableStateOf(value = false) }
+    var selectedBooking by remember { mutableStateOf<Booking?>(null) }
 
     // Background Transition Logic (60 seconds)
     var currentBgIndex by remember { mutableIntStateOf(0) }
@@ -44,7 +49,7 @@ fun AdminDashboardScreen(viewModel: AdminViewModel) {
 
     LaunchedEffect(Unit) {
         while (true) {
-            kotlinx.coroutines.delay(60000) // 60 seconds interval
+            kotlinx.coroutines.delay(60000.milliseconds) // 60 seconds interval
             currentBgIndex = (currentBgIndex + 1) % backgrounds.size
         }
     }
@@ -62,7 +67,7 @@ fun AdminDashboardScreen(viewModel: AdminViewModel) {
             Image(
                 painter = painterResource(bgRes),
                 contentDescription = null,
-                modifier = Modifier.fillMaxSize().blur(40.dp),
+                modifier = Modifier.fillMaxSize().blur(if (selectedBooking != null) 60.dp else 40.dp),
                 contentScale = ContentScale.Crop
             )
         }
@@ -76,11 +81,12 @@ fun AdminDashboardScreen(viewModel: AdminViewModel) {
 
         Scaffold(
             containerColor = Color.Transparent,
+            modifier = Modifier.blur(if (selectedBooking != null) 15.dp else 0.dp),
             topBar = {
                 CenterAlignedTopAppBar(
                     title = { 
                         Text(
-                            "ADMIN_DASHBOARD",
+                            strings.adminDashboard,
                             fontWeight = FontWeight.Black, 
                             color = onSurface,
                             fontFamily = FontFamily.Monospace
@@ -96,7 +102,7 @@ fun AdminDashboardScreen(viewModel: AdminViewModel) {
             ) {
                 // Stations Module
                 Column(modifier = Modifier.weight(1f)) {
-                    SectionHeader("STATIONS_DB", onAdd = { showAddStationDialog = true })
+                    SectionHeader(strings.stationsDb, strings = strings) { showAddStationDialog = true }
                     Spacer(modifier = Modifier.height(16.dp))
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(state.stations) { station ->
@@ -112,14 +118,14 @@ fun AdminDashboardScreen(viewModel: AdminViewModel) {
                                     },
                                     supportingContent = { 
                                         Text(
-                                            "LAT:${station.latitude} | LNG:${station.longitude}",
+                                            "${strings.lat}${strings.colonSeparator}${station.latitude}${strings.pipeSeparator}${strings.lng}${strings.colonSeparator}${station.longitude}",
                                             color = onSurface.copy(alpha = 0.5f),
                                             fontFamily = FontFamily.Monospace
                                         ) 
                                     },
                                     trailingContent = {
                                         IconButton(onClick = { viewModel.deleteStation(station.id) }) {
-                                            Icon(Icons.Rounded.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error)
+                                            Icon(Icons.Rounded.Delete, contentDescription = strings.delete, tint = MaterialTheme.colorScheme.error)
                                         }
                                     },
                                     colors = ListItemDefaults.colors(containerColor = Color.Transparent)
@@ -131,7 +137,7 @@ fun AdminDashboardScreen(viewModel: AdminViewModel) {
 
                 // Fleet Module
                 Column(modifier = Modifier.weight(1f)) {
-                    SectionHeader("TRAINS_ACTIVE", onAdd = { showAddTrainDialog = true })
+                    SectionHeader(strings.trainsActive, strings = strings, onAdd = { showAddTrainDialog = true })
                     Spacer(modifier = Modifier.height(16.dp))
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         items(state.trains) { train ->
@@ -146,15 +152,17 @@ fun AdminDashboardScreen(viewModel: AdminViewModel) {
                                         ) 
                                     },
                                     supportingContent = { 
+                                        val hasSchedule = train.schedule.isNotEmpty()
+                                        val trainSuffix = if (hasSchedule) strings.express else strings.hubService
                                         Text(
-                                            "UNITS:${train.carriages.size} | STATUS:${train.status}",
+                                            "${strings.unitsLabel}${strings.colonSeparator}${train.carriages.size}${strings.pipeSeparator}${strings.statusLabel}${strings.colonSeparator}${train.status}${strings.pipeSeparator}${strings.typeLabel}${strings.colonSeparator}$trainSuffix",
                                             color = onSurface.copy(alpha = 0.5f),
                                             fontFamily = FontFamily.Monospace
                                         ) 
                                     },
                                     trailingContent = {
                                         IconButton(onClick = { viewModel.deleteTrain(train.id) }) {
-                                            Icon(Icons.Rounded.Delete, contentDescription = "Delete", tint = MaterialTheme.colorScheme.error)
+                                            Icon(Icons.Rounded.Delete, contentDescription = strings.delete, tint = MaterialTheme.colorScheme.error)
                                         }
                                     },
                                     colors = ListItemDefaults.colors(containerColor = Color.Transparent)
@@ -166,13 +174,13 @@ fun AdminDashboardScreen(viewModel: AdminViewModel) {
 
                 // Monitoring Module
                 Column(modifier = Modifier.weight(1f)) {
-                    SectionHeader("USER_ACTIVITY_LOG", onAdd = null)
+                    SectionHeader(strings.userActivityLog, strings = strings, onAdd = null)
                     Spacer(modifier = Modifier.height(16.dp))
                     LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                         if (state.bookings.isEmpty()) {
                             item {
                                 Text(
-                                    "NO_ACTIVITY_DETECTED",
+                                    strings.noActivity,
                                     color = onSurface.copy(alpha = 0.3f),
                                     fontFamily = FontFamily.Monospace,
                                     modifier = Modifier.padding(16.dp)
@@ -184,11 +192,13 @@ fun AdminDashboardScreen(viewModel: AdminViewModel) {
                             val source = state.stations.find { it.id == booking.startStationId }
                             val dest = state.stations.find { it.id == booking.endStationId }
                             
-                            GlassPanel {
+                            GlassPanel(
+                                onClick = { selectedBooking = booking }
+                            ) {
                                 ListItem(
                                     headlineContent = { 
                                         Text(
-                                            "TICKET_PURCHASE: ${booking.passengerName}", 
+                                            "${strings.ticketPurchase}: ${booking.passengerName}", 
                                             fontWeight = FontWeight.Bold, 
                                             color = onSurface,
                                             fontFamily = FontFamily.Monospace
@@ -196,7 +206,7 @@ fun AdminDashboardScreen(viewModel: AdminViewModel) {
                                     },
                                     supportingContent = { 
                                         Text(
-                                            "TRAIN:${train?.name ?: "UNKNOWN"} | ROUTE:${source?.name ?: "N/A"} -> ${dest?.name ?: "N/A"} | AMT:${booking.price}",
+                                            "${strings.trainLabel}${strings.colonSeparator}${train?.name ?: strings.unknown}${strings.pipeSeparator}${strings.routeLabel}${strings.colonSeparator}${source?.name ?: strings.na} ${strings.routeArrow} ${dest?.name ?: strings.na}${strings.pipeSeparator}${strings.amtLabel}${strings.colonSeparator}${booking.price}",
                                             color = onSurface.copy(alpha = 0.5f),
                                             fontFamily = FontFamily.Monospace,
                                             fontSize = MaterialTheme.typography.bodySmall.fontSize
@@ -214,8 +224,36 @@ fun AdminDashboardScreen(viewModel: AdminViewModel) {
             }
         }
 
+        AnimatedVisibility(
+            visible = selectedBooking != null,
+            enter = fadeIn() + scaleIn(initialScale = 0.9f),
+            exit = fadeOut() + scaleOut(targetScale = 0.9f)
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.8f))
+                    .clickable { selectedBooking = null },
+                contentAlignment = Alignment.Center
+            ) {
+                selectedBooking?.let { booking ->
+                    val source = state.stations.find { it.id == booking.startStationId }
+                    val dest = state.stations.find { it.id == booking.endStationId }
+
+                    AdminTicketAustereView(
+                        booking = booking,
+                        startStation = source,
+                        endStation = dest,
+                        modifier = Modifier.width(600.dp).clickable(enabled = false) { },
+                        onClose = { selectedBooking = null }
+                    )
+                }
+            }
+        }
+
         if (showAddStationDialog) {
             AddStationDialog(
+                strings = strings,
                 onDismiss = { showAddStationDialog = false },
                 onAdd = { name, lat, lng ->
                     viewModel.addStation(name, lat, lng)
@@ -226,6 +264,7 @@ fun AdminDashboardScreen(viewModel: AdminViewModel) {
 
         if (showAddTrainDialog) {
             AddTrainDialog(
+                strings = strings,
                 onDismiss = { showAddTrainDialog = false },
                 onAdd = { name, seats ->
                     viewModel.addTrain(name, seats)
@@ -237,7 +276,7 @@ fun AdminDashboardScreen(viewModel: AdminViewModel) {
 }
 
 @Composable
-fun SectionHeader(title: String, onAdd: (() -> Unit)?) {
+fun SectionHeader(title: String, strings: com.example.railway.ui.theme.RailwayStrings, onAdd: (() -> Unit)?) {
     val onSurface = MaterialTheme.colorScheme.onSurface
     Row(
         modifier = Modifier.fillMaxWidth(),
@@ -251,68 +290,68 @@ fun SectionHeader(title: String, onAdd: (() -> Unit)?) {
             color = onSurface,
             fontFamily = FontFamily.Monospace
         )
-        if (onAdd != null) {
+        onAdd?.let {
             Button(
-                onClick = onAdd,
+                onClick = it,
                 shape = RoundedCornerShape(12.dp),
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
             ) {
                 Icon(Icons.Rounded.Add, contentDescription = null, modifier = Modifier.size(18.dp))
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("NEW_ENTRY", fontFamily = FontFamily.Monospace)
+                Text(strings.newEntry, fontFamily = FontFamily.Monospace)
             }
         }
     }
 }
 
 @Composable
-fun AddStationDialog(onDismiss: () -> Unit, onAdd: (String, Double, Double) -> Unit) {
+fun AddStationDialog(strings: com.example.railway.ui.theme.RailwayStrings, onDismiss: () -> Unit, onAdd: (String, Double, Double) -> Unit) {
     var name by remember { mutableStateOf("") }
     var lat by remember { mutableStateOf("") }
     var lng by remember { mutableStateOf("") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("ADD_STATION_NODE", fontFamily = FontFamily.Monospace) },
+        title = { Text(strings.registerStation, fontFamily = FontFamily.Monospace) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextField(value = name, onValueChange = { name = it }, label = { Text("NAME") })
-                TextField(value = lat, onValueChange = { lat = it }, label = { Text("LAT") })
-                TextField(value = lng, onValueChange = { lng = it }, label = { Text("LNG") })
+                TextField(value = name, onValueChange = { name = it }, label = { Text(strings.name) })
+                TextField(value = lat, onValueChange = { lat = it }, label = { Text(strings.lat) })
+                TextField(value = lng, onValueChange = { lng = it }, label = { Text(strings.lng) })
             }
         },
         confirmButton = {
             Button(onClick = { onAdd(name, lat.toDoubleOrNull() ?: 0.0, lng.toDoubleOrNull() ?: 0.0) }) {
-                Text("EXECUTE", fontFamily = FontFamily.Monospace)
+                Text(strings.execute, fontFamily = FontFamily.Monospace)
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("ABORT", fontFamily = FontFamily.Monospace) }
+            TextButton(onClick = onDismiss) { Text(strings.abort, fontFamily = FontFamily.Monospace) }
         }
     )
 }
 
 @Composable
-fun AddTrainDialog(onDismiss: () -> Unit, onAdd: (String, Int) -> Unit) {
+fun AddTrainDialog(strings: com.example.railway.ui.theme.RailwayStrings, onDismiss: () -> Unit, onAdd: (String, Int) -> Unit) {
     var name by remember { mutableStateOf("") }
     var seats by remember { mutableStateOf("") }
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("DEPLOY_NEW_TRAIN", fontFamily = FontFamily.Monospace) },
+        title = { Text(strings.deployTrain, fontFamily = FontFamily.Monospace) },
         text = {
             Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                TextField(value = name, onValueChange = { name = it }, label = { Text("ID_NAME") })
-                TextField(value = seats, onValueChange = { seats = it }, label = { Text("CAPACITY") })
+                TextField(value = name, onValueChange = { name = it }, label = { Text(strings.trainId) })
+                TextField(value = seats, onValueChange = { seats = it }, label = { Text(strings.capacity) })
             }
         },
         confirmButton = {
             Button(onClick = { onAdd(name, seats.toIntOrNull() ?: 300) }) {
-                Text("DEPLOY", fontFamily = FontFamily.Monospace)
+                Text(strings.deploy, fontFamily = FontFamily.Monospace)
             }
         },
         dismissButton = {
-            TextButton(onClick = onDismiss) { Text("CANCEL", fontFamily = FontFamily.Monospace) }
+            TextButton(onClick = onDismiss) { Text(strings.cancel, fontFamily = FontFamily.Monospace) }
         }
     )
 }

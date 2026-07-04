@@ -14,7 +14,7 @@ data class AdminState(
     val trains: List<Train> = emptyList(),
     val users: List<User> = emptyList(),
     val bookings: List<Booking> = emptyList(),
-    val stateBoundaries: List<StateBoundary> = emptyList()
+    val stateBoundaries: List<StateBoundary> = emptyList(),
 )
 
 class AdminViewModel(

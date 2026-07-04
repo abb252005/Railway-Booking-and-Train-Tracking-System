@@ -7,6 +7,8 @@ data class Train(
     val id: String,
     val name: String,
     val status: TrainStatus,
+    val maxSpeedMph: Int = 79, // Default conservative cap (Section 19.1)
+    val operatorCode: String = "AMTK",
     val carriages: List<Carriage> = emptyList(),
     val schedule: List<ScheduleEntry> = emptyList()
 ) {

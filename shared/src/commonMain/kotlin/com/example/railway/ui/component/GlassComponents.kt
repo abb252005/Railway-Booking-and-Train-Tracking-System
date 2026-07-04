@@ -79,6 +79,7 @@ fun GlassPanel(
     opacity: Float? = null,
     isStatic: Boolean = false,
     onClick: (() -> Unit)? = null,
+    border: androidx.compose.foundation.BorderStroke? = null,
     content: @Composable () -> Unit
 ) {
     val baseBackgroundColor = if (isStatic) Color.White else MaterialTheme.colorScheme.surface
@@ -100,7 +101,7 @@ fun GlassPanel(
             onClick = onClick,
             modifier = modifier
                 .clip(RoundedCornerShape(cornerRadius))
-                .border(1.dp, borderColor, RoundedCornerShape(cornerRadius)),
+                .let { if (border != null) it.border(border, RoundedCornerShape(cornerRadius)) else it.border(1.dp, borderColor, RoundedCornerShape(cornerRadius)) },
             color = backgroundColor,
             shape = RoundedCornerShape(cornerRadius),
             content = content
@@ -110,7 +111,7 @@ fun GlassPanel(
             modifier = modifier
                 .clip(RoundedCornerShape(cornerRadius))
                 .background(backgroundColor)
-                .border(1.dp, borderColor, RoundedCornerShape(cornerRadius))
+                .let { if (border != null) it.border(border, RoundedCornerShape(cornerRadius)) else it.border(1.dp, borderColor, RoundedCornerShape(cornerRadius)) }
         ) {
             content()
         }

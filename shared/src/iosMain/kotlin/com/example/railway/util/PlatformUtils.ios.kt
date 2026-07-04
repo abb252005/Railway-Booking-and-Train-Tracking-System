@@ -10,3 +10,12 @@ actual fun downloadTicket(
 ) {
     // Not implemented for iOS yet
 }
+
+actual fun downloadPaymentReport(
+    booking: Booking,
+    startStationName: String,
+    endStationName: String,
+    trainName: String
+) {
+    // Not implemented for iOS yet
+}

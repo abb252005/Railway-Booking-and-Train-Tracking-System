@@ -1,5 +1,6 @@
 package com.example.railway.domain.repository
 
+import com.example.railway.db.*
 import com.example.railway.domain.model.*
 import com.example.railway.util.StateBoundary
 import kotlinx.coroutines.flow.Flow
@@ -18,6 +19,7 @@ interface RailwayRepository {
 
     fun getAllBookings(): Flow<List<Booking>>
     suspend fun insertBooking(booking: Booking)
+    suspend fun getReservedSeats(trainId: String, departureDate: Long): List<Pair<String, String>>
 
     fun getAllSchedules(): Flow<List<ScheduleEntry>>
     suspend fun insertSchedule(schedule: ScheduleEntry)
@@ -36,4 +38,17 @@ interface RailwayRepository {
     fun getAllStates(): Flow<List<StateBoundary>>
     suspend fun insertState(state: StateBoundary)
     suspend fun deleteAllStates()
+
+    // Chat
+    fun observeSessions(userId: String): Flow<List<ChatSessionEntity>>
+    fun observeMessages(sessionId: Long): Flow<List<ChatMessageEntity>>
+    suspend fun createSession(userId: String, title: String): Long
+    suspend fun updateSessionTitle(sessionId: Long, title: String)
+    suspend fun deleteSession(sessionId: Long)
+    suspend fun saveChatMessage(sessionId: Long, userId: String, role: String, text: String)
+    suspend fun clearChatHistory(userId: String)
+
+    // Config
+    suspend fun getLanguage(): String
+    suspend fun setLanguage(language: String)
 }

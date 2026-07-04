@@ -22,3 +22,6 @@ captures/
 
 # macOS
 .DS_Store
+
+# SQLite databases
+*.db

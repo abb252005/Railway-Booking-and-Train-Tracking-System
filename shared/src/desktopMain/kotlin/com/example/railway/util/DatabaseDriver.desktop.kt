@@ -5,11 +5,11 @@ import app.cash.sqldelight.driver.jdbc.sqlite.JdbcSqliteDriver
 import com.example.railway.db.RailwayDatabase
 
 actual fun getDriver(): SqlDriver {
-    val driver: SqlDriver = JdbcSqliteDriver("jdbc:sqlite:railway_v8.db")
+    val driver: SqlDriver = JdbcSqliteDriver("jdbc:sqlite:railway_v17.db")
     try {
         RailwayDatabase.Schema.create(driver)
-    } catch (e: Exception) {
-        // Driver already created or table exists
+    } catch (_: Exception) {
+        // Already created
     }
     return driver
 }

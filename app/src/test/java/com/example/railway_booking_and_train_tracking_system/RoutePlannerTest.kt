@@ -10,9 +10,9 @@ class RoutePlannerTest {
 
     @Test
     fun `findShortestPath returns correct path`() {
-        val s1 = Station("1", "Station 1", 0.0, 0.0)
-        val s2 = Station("2", "Station 2", 1.0, 1.0)
-        val s3 = Station("3", "Station 3", 2.0, 2.0)
+        val s1 = Station("1", "Station 1", latitude = 0.0, longitude = 0.0)
+        val s2 = Station("2", "Station 2", latitude = 1.0, longitude = 1.0)
+        val s3 = Station("3", "Station 3", latitude = 2.0, longitude = 2.0)
 
         val r1 = Route("r1", "1", "2", 10.0, 10)
         val r2 = Route("r2", "2", "3", 10.0, 10)

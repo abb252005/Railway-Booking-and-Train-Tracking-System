@@ -18,24 +18,30 @@ import androidx.compose.ui.unit.sp
 import com.example.railway.presentation.BookingViewModel
 import com.example.railway.ui.component.GlassPanel
 
+import com.example.railway.domain.auth.AuthManager
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun UserCabinetScreen(
     bookingViewModel: BookingViewModel,
+    authManager: AuthManager,
     isDark: Boolean = true,
     onBack: () -> Unit
 ) {
+    val strings = com.example.railway.ui.theme.LocalRailwayStrings.current
     val state by bookingViewModel.state.collectAsState()
+    val authState by authManager.state.collectAsState()
     val textColor = if (isDark) Color.White else Color.Black
+    val username = authState.username ?: strings.guest
 
     Scaffold(
         containerColor = Color.Transparent,
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("User Cabinet", fontWeight = FontWeight.Bold, color = textColor) },
+                title = { Text(strings.userCabinet, fontWeight = FontWeight.Bold, color = textColor) },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = "Back", tint = textColor)
+                        Icon(Icons.AutoMirrored.Rounded.ArrowBack, contentDescription = strings.back, tint = textColor)
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = Color.Transparent)
@@ -57,12 +63,12 @@ fun UserCabinetScreen(
                     )
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        "Pippa Fitz-Amobi", 
+                        username,
                         style = MaterialTheme.typography.headlineSmall, 
                         fontWeight = FontWeight.Black,
                         color = textColor
                     )
-                    Text("Loyalty Member", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                    Text(strings.loyaltyMember, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
                     
                     Spacer(modifier = Modifier.height(32.dp))
                     HorizontalDivider(color = textColor.copy(alpha = 0.1f))
@@ -73,14 +79,14 @@ fun UserCabinetScreen(
                         horizontalArrangement = Arrangement.SpaceAround
                     ) {
                         CabinetStat(
-                            label = "Wallet Balance",
-                            value = "$${(state.walletBalance * 100).toInt() / 100.0}",
+                            label = strings.walletBalance,
+                            value = "${strings.currencySymbol}${(state.walletBalance * 100).toInt() / 100.0}",
                             icon = Icons.Rounded.Wallet,
                             color = Color(0xFF32D74B),
                             textColor = textColor
                         )
                         CabinetStat(
-                            label = "Total Rides",
+                            label = strings.totalRides,
                             value = "${state.totalRides}",
                             icon = Icons.Rounded.Stars,
                             color = Color(0xFFFFD60A),
@@ -91,15 +97,16 @@ fun UserCabinetScreen(
                     Spacer(modifier = Modifier.height(40.dp))
                     
                     if (state.totalRides < 10) {
+                        val ridesNeeded = (10 - state.totalRides).toInt()
                         Text(
-                            "Complete ${10 - state.totalRides} more rides to unlock your discount!",
+                            strings.unlockDiscount(ridesNeeded),
                             style = MaterialTheme.typography.bodySmall,
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                             color = textColor.copy(alpha = 0.6f)
                         )
                     } else {
                         Text(
-                            "You are eligible for a 1 cent/km discount on every trip!",
+                            strings.eligibleDiscount,
                             style = MaterialTheme.typography.bodySmall,
                             fontWeight = FontWeight.Bold,
                             color = MaterialTheme.colorScheme.secondary

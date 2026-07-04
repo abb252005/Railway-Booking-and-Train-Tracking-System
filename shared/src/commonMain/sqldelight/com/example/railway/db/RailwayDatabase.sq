@@ -11,11 +11,19 @@ CREATE TABLE UserEntity (
 CREATE TABLE StationEntity (
     id TEXT NOT NULL PRIMARY KEY,
     name TEXT NOT NULL,
+    code TEXT NOT NULL DEFAULT '',
+    city TEXT NOT NULL DEFAULT '',
+    state TEXT NOT NULL DEFAULT '',
+    timezone TEXT NOT NULL DEFAULT 'America/New_York',
     latitude REAL NOT NULL,
     longitude REAL NOT NULL,
     designatedTrainId TEXT,
     info TEXT NOT NULL DEFAULT '',
-    terminal TEXT NOT NULL DEFAULT 'Main Terminal'
+    terminal TEXT NOT NULL DEFAULT 'Main Terminal',
+    hasLounge INTEGER NOT NULL DEFAULT 0,
+    hasCheckedBaggage INTEGER NOT NULL DEFAULT 1,
+    hasKiosks INTEGER NOT NULL DEFAULT 1,
+    isHub INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE TrainEntity (
@@ -23,6 +31,8 @@ CREATE TABLE TrainEntity (
     name TEXT NOT NULL,
     totalSeats INTEGER NOT NULL,
     status TEXT NOT NULL,
+    max_speed_mph INTEGER NOT NULL DEFAULT 79,
+    operator_code TEXT NOT NULL DEFAULT 'AMTK',
     carriageCount INTEGER NOT NULL DEFAULT 3
 );
 
@@ -33,29 +43,57 @@ CREATE TABLE RouteEntity (
     distance REAL NOT NULL,
     estimatedTime INTEGER NOT NULL,
     waypoints TEXT,
+    slowOrders TEXT,
+    elevationProfile TEXT,
+    trackClass TEXT NOT NULL DEFAULT 'CLASS_4',
     FOREIGN KEY (sourceStationId) REFERENCES StationEntity(id) ON DELETE CASCADE,
     FOREIGN KEY (destinationStationId) REFERENCES StationEntity(id) ON DELETE CASCADE
 );
 
 CREATE TABLE BookingEntity (
     id TEXT NOT NULL PRIMARY KEY,
+    reservationId TEXT NOT NULL DEFAULT '',
     userId TEXT NOT NULL,
     trainId TEXT NOT NULL,
+    publicTrainNumber TEXT NOT NULL DEFAULT '',
+    serviceName TEXT NOT NULL DEFAULT '',
     passengerName TEXT NOT NULL,
+    passengerType TEXT NOT NULL DEFAULT 'Adult',
     carriageId TEXT NOT NULL,
     seatNumber TEXT NOT NULL,
+    fareClass TEXT NOT NULL DEFAULT 'COACH',
+    fareProductName TEXT NOT NULL DEFAULT 'Standard',
     startStationId TEXT NOT NULL,
     endStationId TEXT NOT NULL,
+    startStationCode TEXT NOT NULL DEFAULT '',
+    endStationCode TEXT NOT NULL DEFAULT '',
     departureDate INTEGER NOT NULL,
+    serviceDate TEXT NOT NULL DEFAULT '',
     departureTimeMillis INTEGER NOT NULL DEFAULT 0,
     arrivalTimeMillis INTEGER NOT NULL DEFAULT 0,
+    timezone TEXT NOT NULL DEFAULT 'America/New_York',
     paymentMethod TEXT NOT NULL,
+    paymentStatus TEXT NOT NULL DEFAULT 'Paid',
     price TEXT NOT NULL,
+    totalAmountCents INTEGER NOT NULL DEFAULT 0,
+    baseAmountCents INTEGER NOT NULL DEFAULT 0,
+    taxAmountCents INTEGER NOT NULL DEFAULT 0,
+    currency TEXT NOT NULL DEFAULT 'USD',
     timestamp INTEGER NOT NULL,
+    validityStartsAt INTEGER NOT NULL DEFAULT 0,
+    validityEndsAt INTEGER NOT NULL DEFAULT 0,
+    barcodePayload TEXT NOT NULL DEFAULT '',
+    status TEXT NOT NULL DEFAULT 'ISSUED',
+    isReserved INTEGER NOT NULL DEFAULT 1,
     FOREIGN KEY (userId) REFERENCES UserEntity(id) ON DELETE CASCADE,
     FOREIGN KEY (trainId) REFERENCES TrainEntity(id) ON DELETE CASCADE,
     FOREIGN KEY (startStationId) REFERENCES StationEntity(id) ON DELETE CASCADE,
     FOREIGN KEY (endStationId) REFERENCES StationEntity(id) ON DELETE CASCADE
+);
+
+CREATE TABLE AppConfigEntity (
+    configKey TEXT NOT NULL PRIMARY KEY,
+    configValue TEXT NOT NULL
 );
 
 CREATE TABLE ScheduleEntity (
@@ -75,9 +113,80 @@ CREATE TABLE ScheduleEntity (
 
 CREATE TABLE StateEntity (
     name TEXT NOT NULL PRIMARY KEY,
+    abbreviation TEXT NOT NULL DEFAULT '',
+    population TEXT NOT NULL DEFAULT '',
     points TEXT NOT NULL, -- Serialized List<Pair<Double, Double>> "lat,lng;lat,lng"
     centroidLat REAL NOT NULL,
     centroidLng REAL NOT NULL
+);
+
+CREATE TABLE RoleEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL
+);
+
+CREATE TABLE PermissionEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    description TEXT NOT NULL
+);
+
+CREATE TABLE UserRoleEntity (
+    userId TEXT NOT NULL,
+    roleId TEXT NOT NULL,
+    PRIMARY KEY (userId, roleId),
+    FOREIGN KEY (userId) REFERENCES UserEntity(id) ON DELETE CASCADE,
+    FOREIGN KEY (roleId) REFERENCES RoleEntity(id) ON DELETE CASCADE
+);
+
+CREATE TABLE FareProductEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    name TEXT NOT NULL,
+    fareClass TEXT NOT NULL,
+    refundRules TEXT NOT NULL
+);
+
+CREATE TABLE FareQuoteSnapshotEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    routeId TEXT NOT NULL,
+    trainId TEXT NOT NULL,
+    fareProductId TEXT NOT NULL,
+    amountCents INTEGER NOT NULL,
+    currency TEXT NOT NULL,
+    expiresAtUtc INTEGER NOT NULL
+);
+
+CREATE TABLE AuditLogEntity (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    eventType TEXT NOT NULL,
+    actorId TEXT NOT NULL,
+    timestamp INTEGER NOT NULL,
+    details TEXT NOT NULL
+);
+
+CREATE TABLE RefundEntity (
+    id TEXT NOT NULL PRIMARY KEY,
+    bookingId TEXT NOT NULL,
+    amountCents INTEGER NOT NULL,
+    status TEXT NOT NULL,
+    reason TEXT,
+    timestamp INTEGER NOT NULL,
+    FOREIGN KEY (bookingId) REFERENCES BookingEntity(id) ON DELETE CASCADE
+);
+
+CREATE TABLE ChatSessionEntity (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    userId TEXT NOT NULL,
+    title TEXT NOT NULL,
+    lastUpdated INTEGER NOT NULL
+);
+
+CREATE TABLE ChatMessageEntity (
+    id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    sessionId INTEGER NOT NULL,
+    userId TEXT NOT NULL,
+    role TEXT NOT NULL, -- "user" or "assistant"
+    text TEXT NOT NULL,
+    timestamp INTEGER NOT NULL
 );
 
 -- User Queries
@@ -112,8 +221,8 @@ findStationById:
 SELECT * FROM StationEntity WHERE id = ?;
 
 insertStation:
-INSERT OR REPLACE INTO StationEntity(id, name, latitude, longitude, designatedTrainId, info, terminal)
-VALUES (?, ?, ?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO StationEntity(id, name, code, city, state, timezone, latitude, longitude, designatedTrainId, info, terminal, hasLounge, hasCheckedBaggage, hasKiosks, isHub)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 deleteStation:
 DELETE FROM StationEntity WHERE id = ?;
@@ -127,8 +236,8 @@ findTrainById:
 SELECT * FROM TrainEntity WHERE id = ?;
 
 insertTrain:
-INSERT OR REPLACE INTO TrainEntity(id, name, totalSeats, status, carriageCount)
-VALUES (?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO TrainEntity(id, name, totalSeats, status, max_speed_mph, operator_code, carriageCount)
+VALUES (?, ?, ?, ?, ?, ?, ?);
 
 deleteTrain:
 DELETE FROM TrainEntity WHERE id = ?;
@@ -148,8 +257,8 @@ findRoutesByStations:
 SELECT * FROM RouteEntity WHERE sourceStationId = ? AND destinationStationId = ?;
 
 insertRoute:
-INSERT OR REPLACE INTO RouteEntity(id, sourceStationId, destinationStationId, distance, estimatedTime, waypoints)
-VALUES (?, ?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO RouteEntity(id, sourceStationId, destinationStationId, distance, estimatedTime, waypoints, slowOrders, elevationProfile, trackClass)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 deleteRoute:
 DELETE FROM RouteEntity WHERE id = ?;
@@ -165,12 +274,15 @@ SELECT * FROM BookingEntity WHERE id = ?;
 findBookingsByUser:
 SELECT * FROM BookingEntity WHERE userId = ?;
 
+findReservedSeats:
+SELECT carriageId, seatNumber FROM BookingEntity WHERE trainId = ? AND departureDate = ?;
+
 countUserBookings:
 SELECT COUNT(*) FROM BookingEntity WHERE userId = ?;
 
 insertBooking:
-INSERT OR REPLACE INTO BookingEntity(id, userId, trainId, passengerName, carriageId, seatNumber, startStationId, endStationId, departureDate, departureTimeMillis, arrivalTimeMillis, paymentMethod, price, timestamp)
-VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+INSERT OR REPLACE INTO BookingEntity(id, reservationId, userId, trainId, publicTrainNumber, serviceName, passengerName, passengerType, carriageId, seatNumber, fareClass, fareProductName, startStationId, endStationId, startStationCode, endStationCode, departureDate, serviceDate, departureTimeMillis, arrivalTimeMillis, timezone, paymentMethod, paymentStatus, price, totalAmountCents, baseAmountCents, taxAmountCents, currency, timestamp, validityStartsAt, validityEndsAt, barcodePayload, status, isReserved)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
 deleteBooking:
 DELETE FROM BookingEntity WHERE id = ?;
@@ -207,8 +319,46 @@ selectAllStates:
 SELECT * FROM StateEntity;
 
 insertState:
-INSERT OR REPLACE INTO StateEntity(name, points, centroidLat, centroidLng)
-VALUES (?, ?, ?, ?);
+INSERT OR REPLACE INTO StateEntity(name, abbreviation, population, points, centroidLat, centroidLng)
+VALUES (?, ?, ?, ?, ?, ?);
 
 deleteAllStates:
 DELETE FROM StateEntity;
+
+-- Chat Queries
+selectAllSessions:
+SELECT * FROM ChatSessionEntity WHERE userId = ? ORDER BY lastUpdated DESC;
+
+insertSession:
+INSERT INTO ChatSessionEntity(userId, title, lastUpdated)
+VALUES (?, ?, ?);
+
+lastInsertedRowId:
+SELECT last_insert_rowid();
+
+updateSessionTitle:
+UPDATE ChatSessionEntity SET title = ?, lastUpdated = ? WHERE id = ?;
+
+deleteSession:
+DELETE FROM ChatSessionEntity WHERE id = ?;
+
+deleteMessagesBySession:
+DELETE FROM ChatMessageEntity WHERE sessionId = ?;
+
+selectMessagesBySession:
+SELECT * FROM ChatMessageEntity WHERE sessionId = ? ORDER BY timestamp ASC;
+
+insertMessage:
+INSERT INTO ChatMessageEntity(sessionId, userId, role, text, timestamp)
+VALUES (?, ?, ?, ?, ?);
+
+clearAllChatHistory:
+DELETE FROM ChatMessageEntity WHERE userId = ?;
+
+-- Config Queries
+getAppConfig:
+SELECT configValue FROM AppConfigEntity WHERE configKey = ?;
+
+setAppConfig:
+INSERT OR REPLACE INTO AppConfigEntity(configKey, configValue)
+VALUES (?, ?);

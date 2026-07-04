@@ -41,7 +41,7 @@ fun BookingScreen(
     } else if (state.selectedTrainId == null) {
         TrainSelectionStep(
             trains = trains,
-            onTrainSelected = { viewModel.selectTrain(it.id) }
+            onTrainSelected = { viewModel.selectTrain(it.id, trains) }
         )
     } else {
         SeatSelectionStep(

@@ -8,39 +8,51 @@ object USDataGenerator {
         val terminals = listOf("Terminal A", "Terminal B", "Platform 4", "Main Hall", "East Wing", "Gate 7")
         return StateBoundaries.allStates.mapIndexed { index, boundary ->
             val isIsolated = boundary.name == "Alaska" || boundary.name == "Hawaii"
+            val isHub = boundary.population.replace(",", "").toLongOrNull()?.let { it > 5000000 } ?: false
+            
             val info = if (isIsolated) {
                 "Major isolated station in the state of ${boundary.name}. Serves as a key hub for regional/in-state transport."
             } else {
                 "Major station in the state of ${boundary.name}. Serves as a key hub for regional transport."
             }
+
+            val timezone = when (boundary.abbreviation) {
+                "HI" -> "Pacific/Honolulu"
+                "AK" -> "America/Anchorage"
+                "CA", "OR", "WA", "NV" -> "America/Los_Angeles"
+                "AZ", "CO", "MT", "UT", "WY", "NM" -> "America/Denver"
+                "AL", "AR", "IL", "IA", "KS", "LA", "MN", "MS", "MO", "NE", "ND", "OK", "SD", "TN", "TX", "WI" -> "America/Chicago"
+                else -> "America/New_York"
+            }
+
             Station(
                 id = "s${index + 1}",
                 name = boundary.name,
+                code = boundary.abbreviation,
+                city = boundary.name,
+                state = boundary.abbreviation,
+                timezone = timezone,
                 latitude = boundary.centroid.first,
                 longitude = boundary.centroid.second,
                 designatedTrainId = "t${index + 1}",
                 info = info,
-                terminal = terminals.random()
+                terminal = terminals.random(),
+                hasLounge = isHub,
+                hasCheckedBaggage = true,
+                hasKiosks = true,
+                isHub = isHub
             )
         }
     }
 
     fun generateTrains(routes: List<Route>): List<Train> {
-        // baseTime represents 00:00 AM of the current simulated day
         val baseTime = 1718150400000L // 2024-06-12 00:00:00 UTC
-        
         val trains = mutableListOf<Train>()
 
         StateBoundaries.allStates.forEachIndexed { index, boundary ->
             val trainId = "t${index + 1}"
             val schedule = mutableListOf<ScheduleEntry>()
-            
             val sourceStationId = "s${index + 1}"
-            
-            // Alaska and Hawaii are isolated, but they still have a station and should have a train.
-            // However, they won't have routes to other states.
-            // Let's give them a mock internal route if we want them to "move", 
-            // or just let them stay at the station if no routes exist.
             val possibleRoutes = routes.filter { it.sourceStationId == sourceStationId }
             val route = possibleRoutes.randomOrNull()
             
@@ -48,26 +60,19 @@ object USDataGenerator {
                 var departureTime = baseTime + (index * 25 * 60000L)
                 var duration = route.estimatedTimeMinutes * 60000L
                 
-                // Special schedules for Alaska and Hawaii
                 if (boundary.name == "Hawaii") {
-                    // Hawaii Skyline: 4:00 AM to 10:30 PM, every 10-15 mins
-                    // For the demo, let's pick a random time in that window
                     val startWindow = 4 * 60 * 60000L
                     val endWindow = 22 * 60 * 60000L + 30 * 60000L
                     departureTime = baseTime + Random.nextLong(startWindow, endWindow)
                     duration = Random.nextInt(10, 15) * 60000L
                 } else if (boundary.name == "Alaska") {
-                    // Alaska Railroad: Daytime, 2-12 hours
-                    val startWindow = 6 * 60 * 60000L // 6 AM
-                    val endWindow = 18 * 60 * 60000L // 6 PM
+                    val startWindow = 6 * 60 * 60000L
+                    val endWindow = 18 * 60 * 60000L
                     departureTime = baseTime + Random.nextLong(startWindow, endWindow)
-                    duration = Random.nextInt(120, 720) * 60000L // 2 to 12 hours
+                    duration = Random.nextInt(120, 720) * 60000L
                 }
 
                 val arrivalTime = departureTime + duration
-                
-                // On launch, we don't set isRunning here anymore, 
-                // the ScheduleManager will handle the random 15-20.
                 val isRunning = false
 
                 schedule.add(ScheduleEntry(
@@ -94,7 +99,6 @@ object USDataGenerator {
                     schedule = schedule
                 ))
             } else {
-                // Isolated station with no outgoing routes (Alaska/Hawaii)
                 trains.add(Train(
                     id = trainId,
                     name = "${boundary.name} Hub Service",
@@ -109,10 +113,8 @@ object USDataGenerator {
 
     fun generateRoutes(stations: List<Station>): List<Route> {
         val routes = mutableListOf<Route>()
-        
         val mainlandStations = stations.filter { it.name != "Alaska" && it.name != "Hawaii" }
 
-        // Mainland connections
         mainlandStations.forEach { s1 ->
             val nearest = mainlandStations.filter { it.id != s1.id }
                 .sortedBy { s2 ->
@@ -127,30 +129,54 @@ object USDataGenerator {
                 val averageSpeedKmH = Random.nextDouble(177.0, 322.0)
                 val estimatedTime = (dist / averageSpeedKmH * 60.0).toInt().coerceAtLeast(15)
                 
+                val slowOrders = mutableListOf<SlowOrder>()
+                if (Random.nextInt(10) == 0) { // 10% chance of a slow order
+                    val start = Random.nextDouble(0.2, 0.5)
+                    slowOrders.add(SlowOrder(
+                        startProgress = start,
+                        endProgress = start + 0.1,
+                        speedLimitKmH = 80.0,
+                        reason = "Track Maintenance"
+                    ))
+                }
+
+                val elevationProfile = listOf(
+                    ElevationPoint(0.0, Random.nextDouble(10.0, 50.0)),
+                    ElevationPoint(0.5, Random.nextDouble(100.0, 300.0)),
+                    ElevationPoint(1.0, Random.nextDouble(10.0, 50.0))
+                )
+
+                val trackClass = when {
+                    dist > 500 -> TrackClass.CLASS_7 // Long distance regional
+                    dist > 200 -> TrackClass.CLASS_5
+                    else -> TrackClass.CLASS_4
+                }
+
                 routes.add(Route(
                     id = "r_${s1.id}_${s2.id}",
                     sourceStationId = s1.id,
                     destinationStationId = s2.id,
                     distance = dist,
-                    estimatedTimeMinutes = estimatedTime
+                    estimatedTimeMinutes = estimatedTime,
+                    slowOrders = slowOrders,
+                    elevationProfile = elevationProfile,
+                    trackClass = trackClass
                 ))
             }
         }
 
-        // Alaska and Hawaii isolated routes (circular within their own state)
         listOf("Alaska", "Hawaii").forEach { stateName ->
             val station = stations.find { it.name == stateName }
             if (station != null) {
-                val dist = 100.0 // Mock distance for internal route
+                val dist = 100.0
                 val estimatedTime = if (stateName == "Hawaii") {
-                    Random.nextInt(10, 15) // Skyline frequency/duration
+                    Random.nextInt(10, 15)
                 } else {
-                    Random.nextInt(120, 480) // Alaska Railroad daytime tours (2-8 hours)
+                    Random.nextInt(120, 480)
                 }
 
-                // Generate Curvy Waypoints
                 val waypoints = mutableListOf<Waypoint>()
-                val radius = 0.5 // lat/lng offset
+                val radius = 0.5
                 for (angle in 0 until 360 step 45) {
                     val rad = angle * kotlin.math.PI / 180.0
                     waypoints.add(Waypoint(
@@ -162,7 +188,7 @@ object USDataGenerator {
                 routes.add(Route(
                     id = "r_${station.id}_internal",
                     sourceStationId = station.id,
-                    destinationStationId = station.id, // Circular/Internal loop
+                    destinationStationId = station.id,
                     distance = dist,
                     estimatedTimeMinutes = estimatedTime,
                     waypoints = waypoints
@@ -173,12 +199,8 @@ object USDataGenerator {
         return routes
     }
 
-    /**
-     * Calculates the actual geographical distance between two stations using the Haversine formula.
-     * Returns distance in kilometers.
-     */
     private fun calculateDistance(s1: Station, s2: Station): Double {
-        val r = 6371.0 // Earth's radius in kilometers
+        val r = 6371.0
         val lat1 = s1.latitude * kotlin.math.PI / 180.0
         val lat2 = s2.latitude * kotlin.math.PI / 180.0
         val dLat = (s2.latitude - s1.latitude) * kotlin.math.PI / 180.0

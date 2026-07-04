@@ -21,10 +21,12 @@ import com.example.railway.presentation.*
 import com.example.railway.ui.navigation.*
 import com.example.railway.ui.screen.*
 import com.example.railway.ui.theme.RailwayTheme
+import com.example.railway.util.initDatabase
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        initDatabase(this)
         enableEdgeToEdge()
         setContent {
             App()

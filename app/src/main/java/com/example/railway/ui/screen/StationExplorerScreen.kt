@@ -149,8 +149,8 @@ fun StationExplorerPreview() {
     RailwayTheme {
         StationExplorerScreen(
             stations = listOf(
-                Station("1", "London King's Cross", 51.532, -0.124),
-                Station("2", "Edinburgh Waverley", 55.952, -3.189)
+                Station("1", "London King's Cross", latitude = 51.532, longitude = -0.124),
+                Station("2", "Edinburgh Waverley", latitude = 55.952, longitude = -3.189)
             ),
             onBack = {}
         )

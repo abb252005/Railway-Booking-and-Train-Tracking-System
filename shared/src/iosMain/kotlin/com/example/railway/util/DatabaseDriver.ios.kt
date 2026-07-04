@@ -5,5 +5,5 @@ import app.cash.sqldelight.driver.native.NativeSqliteDriver
 import com.example.railway.db.RailwayDatabase
 
 actual fun getDriver(): SqlDriver {
-    return NativeSqliteDriver(RailwayDatabase.Schema, "railway_v8.db")
+    return NativeSqliteDriver(RailwayDatabase.Schema, "railway_v17.db")
 }

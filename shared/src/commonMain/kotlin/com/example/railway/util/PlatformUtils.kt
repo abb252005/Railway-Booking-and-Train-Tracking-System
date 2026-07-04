@@ -8,3 +8,10 @@ expect fun downloadTicket(
     endStationName: String,
     trainName: String
 )
+
+expect fun downloadPaymentReport(
+    booking: Booking,
+    startStationName: String,
+    endStationName: String,
+    trainName: String
+)

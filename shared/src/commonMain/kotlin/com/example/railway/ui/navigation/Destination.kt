@@ -30,4 +30,7 @@ sealed interface Destination {
 
     @Serializable
     data object UserCabinet : Destination
+
+    @Serializable
+    data object SupportChat : Destination
 }

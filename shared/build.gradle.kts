@@ -19,8 +19,15 @@ kotlin {
         }
     }
     
-    iosArm64()
-    iosSimulatorArm64()
+    listOf(
+        iosArm64(),
+        iosSimulatorArm64()
+    ).forEach {
+        it.binaries.framework {
+            baseName = "shared"
+            isStatic = true
+        }
+    }
 
     jvm("desktop")
 
@@ -39,7 +46,12 @@ kotlin {
             implementation(libs.sqldelight.runtime)
             implementation(libs.sqldelight.coroutines)
             implementation(libs.ktor.client.core)
+            implementation(libs.ktor.client.logging)
+            implementation(libs.ktor.client.content.negotiation)
+            implementation(libs.ktor.serialization.kotlinx.json)
+            implementation(libs.ktor.network)
             implementation(libs.androidx.lifecycle.viewmodel)
+            implementation(kotlin("test"))
         }
         androidMain.dependencies {
             implementation(libs.sqldelight.android.driver)
@@ -53,6 +65,7 @@ kotlin {
             dependencies {
                 implementation(compose.desktop.currentOs)
                 implementation(libs.sqldelight.sqlite.driver)
+                implementation(libs.ktor.client.cio)
                 implementation(libs.kotlinx.coroutines.swing)
                 implementation(libs.pdfbox)
                 implementation(libs.slf4j.simple)

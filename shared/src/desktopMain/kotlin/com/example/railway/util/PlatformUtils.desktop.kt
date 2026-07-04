@@ -10,3 +10,12 @@ actual fun downloadTicket(
 ) {
     PDFTicketGenerator.generate(booking, startStationName, endStationName, trainName)
 }
+
+actual fun downloadPaymentReport(
+    booking: Booking,
+    startStationName: String,
+    endStationName: String,
+    trainName: String
+) {
+    PDFTicketGenerator.generatePaymentReport(booking, startStationName, endStationName, trainName)
+}

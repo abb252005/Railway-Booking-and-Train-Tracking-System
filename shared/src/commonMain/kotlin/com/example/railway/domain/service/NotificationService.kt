@@ -1,86 +1,60 @@
 package com.example.railway.domain.service
 
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import com.example.railway.domain.model.*
+import com.example.railway.util.currentTimeMillis
 
-data class AppNotification(
+data class AdvancedNotification(
     val id: String,
+    val type: NotificationType,
+    val severity: NotificationSeverity,
     val title: String,
-    val message: String,
-    val timestamp: Long
+    val body: String,
+    val timestamp: Long,
+    val metadata: Map<String, String> = emptyMap()
 )
 
-class NotificationService {
-    private val _notifications = MutableStateFlow<List<AppNotification>>(emptyList())
-    val notifications: StateFlow<List<AppNotification>> = _notifications.asStateFlow()
+object NotificationService {
+    private val _notifications = mutableListOf<AdvancedNotification>()
+    val notifications: List<AdvancedNotification> get() = _notifications
 
-    private val notifiedTripIds = mutableSetOf<String>()
-    private val notifiedDelayIds = mutableSetOf<String>()
-
-    fun sendNotification(title: String, message: String) {
-        val notification = AppNotification(
-            id = (1000..9999).random().toString(),
+    fun notify(
+        type: NotificationType,
+        severity: NotificationSeverity,
+        title: String,
+        body: String,
+        metadata: Map<String, String> = emptyMap()
+    ) {
+        val notification = AdvancedNotification(
+            id = "NOTIF-${currentTimeMillis()}",
+            type = type,
+            severity = severity,
             title = title,
-            message = message,
-            timestamp = com.example.railway.util.currentTimeMillis()
+            body = body,
+            timestamp = currentTimeMillis(),
+            metadata = metadata
         )
-        _notifications.update { it + notification }
-        println("NOTIFICATION: [$title] $message")
+        _notifications.add(notification)
+        
+        // Console Log (Internal Terminal Requirement T-09)
+        println("[${notification.timestamp}] ${severity.name} ${type.name}: ${notification.title} - ${notification.body}")
     }
 
-    fun checkAndSendReminders(
-        bookings: List<com.example.railway.domain.model.Booking>,
-        trains: List<com.example.railway.domain.model.Train>
-    ) {
-        val now = com.example.railway.util.currentTimeMillis()
-        val reminderWindow = 30 * 60 * 1000L // 30 minutes
-
-        bookings.forEach { booking ->
+    fun checkAndSendReminders(bookings: List<Booking>, trains: List<Train>) {
+        val now = currentTimeMillis()
+        bookings.filter { it.status == TicketStatus.ISSUED }.forEach { booking ->
             val timeToDeparture = booking.departureTimeMillis - now
-            if (timeToDeparture in 0..reminderWindow && !notifiedTripIds.contains(booking.id)) {
-                val train = trains.find { it.id == booking.trainId }
-                sendNotification(
-                    title = "Trip Reminder",
-                    message = "Your train '${train?.name ?: "Express"}' departs in 30 minutes!"
+            if (timeToDeparture in 0..1800000) { // 30 mins
+                notify(
+                    NotificationType.BOARDING_STARTED,
+                    NotificationSeverity.INFO,
+                    "Departure Reminder",
+                    "Your train ${booking.publicTrainNumber} departs in ${timeToDeparture / 60000} minutes!"
                 )
-                notifiedTripIds.add(booking.id)
             }
         }
     }
 
-    fun checkAndSendStatusAlerts(
-        trains: List<com.example.railway.domain.model.Train>,
-        positions: Map<String, com.example.railway.domain.model.TrainPosition>
-    ) {
-        // Logic for delay alerts (e.g., if ETA significantly exceeds schedule)
-        // For simplicity, we'll mock a delay if speed is below a threshold
-        positions.forEach { (trainId, pos) ->
-            if (pos.speedKmH < 20.0 && !notifiedDelayIds.contains(trainId)) {
-                val train = trains.find { it.id == trainId }
-                sendNotification(
-                    title = "Status Alert",
-                    message = "Train '${train?.name ?: "Express"}' is experiencing delays."
-                )
-                notifiedDelayIds.add(trainId)
-            }
-        }
-    }
-
-    fun scheduleTripReminder(trainName: String, departureTimeMillis: Long) {
-        // In a real app, this would use a work manager or alarms.
-        // For this simulation, we'll just log it or send it immediately for demo.
-        sendNotification(
-            title = "Trip Reminder",
-            message = "Your train '$trainName' departs in 30 minutes!"
-        )
-    }
-
-    fun sendDelayAlert(trainName: String, delayMinutes: Int) {
-        sendNotification(
-            title = "Status Alert",
-            message = "Train '$trainName' is delayed by $delayMinutes minutes."
-        )
+    fun checkAndSendStatusAlerts(trains: List<Train>, positions: Map<String, TrainPosition>) {
+        // Placeholder for complex status alert logic
     }
 }
